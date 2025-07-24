@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Students</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        input {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 6px 12px;
+            margin: 2px;
+            cursor: pointer;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+        .update-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+        .search-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+        }
+        .insert-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Students</h2>
+
+<!-- Input Fields -->
+<div>
+    <input type="text" id="nameInput" placeholder="Name" />
+    <input type="text" id="surnameInput" placeholder="Surname" />
+    <input type="text" id="emailInput" placeholder="Email" />
+    <input type="number" id="ageInput" placeholder="Age" />
+    <input type="text" id="universityInput" placeholder="University" />
+    <button class="search-btn" onclick="searchByName()">Search</button>
+    <button class="insert-btn" onclick="insertStudent()">Insert</button>
+</div>
+
+<!-- Table -->
+<table id="studentTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Surname</th>
+        <th>Email</th>
+        <th>Age</th>
+        <th>University</th>
+        <th>Operation</th>
+    </tr>
+    </thead>
+    <tbody id="studentBody">
+    <!-- Rows will be rendered here -->
+    </tbody>
+</table>
+
+<script>
+    const API_URL = '/api/students'; // замените при необходимости
+
+    function renderStudents(students) {
+        const tbody = document.getElementById('studentBody');
+        tbody.innerHTML = '';
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-id', student.id);
+            row.innerHTML = `
+      <td>${student.id}</td>
+      <td contenteditable="true">${student.name}</td>
+      <td contenteditable="true">${student.surname}</td>
+      <td contenteditable="true">${student.email}</td>
+      <td contenteditable="true">${student.age}</td>
+      <td contenteditable="true">${student.university}</td>
+      <td>
+        <button class="delete-btn" onclick="deleteStudent(${student.id})">Delete</button>
+        <button class="update-btn" onclick="updateStudent(${student.id})">Update</button>
+      </td>
+    `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // 🔍 Search
+    function searchByName() {
+        const name = document.getElementById('nameInput').value;
+        fetch(`${API_URL}/search`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        })
+            .then(res => res.json())
+            .then(data => renderStudents(data))
+            .catch(err => console.error('Search error:', err));
+    }
+
+    // ➕ Insert
+    function insertStudent() {
+        const name = document.getElementById('nameInput').value;
+        const surname = document.getElementById('surnameInput').value;
+        const email = document.getElementById('emailInput').value;
+        const age = parseInt(document.getElementById('ageInput').value);
+        const university = document.getElementById('universityInput').value;
+
+        const payload = { name, surname, email, age, university };
+
+        fetch(`${API_URL}/insert`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(newStudent => {
+                alert('Student inserted');
+                renderStudents([newStudent]); // обновление таблицы
+            })
+            .catch(err => console.error('Insert error:', err));
+    }
+
+    // 🗑️ Delete
+    function deleteStudent(id) {
+        fetch(`${API_URL}/delete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        })
+            .then(res => res.json())
+            .then(() => {
+                alert('Deleted');
+                document.querySelector(`tr[data-id='${id}']`).remove();
+            })
+            .catch(err => console.error('Delete error:', err));
+    }
+
+    // ✏️ Update
+    function updateStudent(id) {
+        const row = document.querySelector(`tr[data-id='${id}']`);
+        const cells = row.querySelectorAll('td');
+
+        const payload = {
+            id,
+            name: cells[1].innerText,
+            surname: cells[2].innerText,
+            email: cells[3].innerText,
+            age: parseInt(cells[4].innerText),
+            university: cells[5].innerText
+        };
+
+        fetch(`${API_URL}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(() => alert('Updated'))
+            .catch(err => console.error('Update error:', err));
+    }
+</script>
+
+</body>
+</html>
