@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create   # prevents Hibernate from changing the schema
+      ddl-auto: none   # prevents Hibernate from changing the schema
     show-sql: true      # optional: shows SQL statements in console
     properties:
       hibernate:

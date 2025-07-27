@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-@CrossOrigin(origins = "*") // разрешает все источники luboy domennen zapros gele biler
+@CrossOrigin(origins = "*") // разрешает все источники !!luboy domennen zapros gele biler
 @RestController
 @RequestMapping("/students")
 public class StudentController {
